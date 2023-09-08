@@ -12,4 +12,5 @@ func main() {
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
 	go server.StartListening()
 	<-signalChan
+
 }

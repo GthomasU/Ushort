@@ -13,9 +13,10 @@ func init() {
 	configRoutes()
 }
 func configRoutes() {
-	v1 := app.Group("api/v1/")
-	v1.Post("/url", controllers.CreateShortUrl)
-	v1.Get("/url/*", controllers.RedirectUrl)
+	groupV1 := app.Group("api/v1/")
+	groupRedirect := app.Group("r/")
+	groupRedirect.Get("/*", controllers.RedirectUrl)
+	groupV1.Post("/url", controllers.CreateShortUrl)
 }
 
 func StartListening() {
