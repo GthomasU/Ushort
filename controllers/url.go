@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"Ushort/shortener"
-	"github.com/gofiber/fiber/v2"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func CreateShortUrl(c *fiber.Ctx) error {
@@ -42,4 +43,21 @@ func RemoveUrl(c *fiber.Ctx) error {
 	} else {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
+}
+
+func UpdateUrl(c *fiber.Ctx) error {
+	urlId := strings.Split(c.Path(), "/")[2]
+	payload := PostShortUrl{}
+	if err := c.BodyParser(&payload); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(ResponseBadRequest{
+			ErrorCode:    "E001",
+			ErrorMessage: err.Error(),
+		})
+	}
+	result := shortener.UpdateOriginalUrl(urlId, payload.Url)
+	if result {
+		return c.SendStatus(fiber.StatusOK)
+	}
+	return c.SendStatus(fiber.StatusBadRequest)
+
 }

@@ -23,6 +23,12 @@ func GetOriginalUrl(urlId string) (string, error) {
 	}
 	return result, nil
 }
+
 func RemoveOriginalUrl(urlId string) bool {
 	return redis.RemoveOriginalUrl(urlId)
+}
+
+func UpdateOriginalUrl(urlId, originalUrl string) bool {
+	return redis.UpdateUrl(urlId, originalUrl)
+
 }

@@ -23,6 +23,13 @@ func init() {
 	})
 }
 
+func UpdateUrl(urlId, originalUrl string) bool {
+	_ = client.HSet(redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId, originalUrl)
+	result := client.HGet(redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId)
+	urlUpdated := result.Val()
+	return urlUpdated == originalUrl
+}
+
 func SaveNewUrl(urlId, originalUrl string) bool {
 	fieldsAdded := client.HSet(redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId, originalUrl)
 	return fieldsAdded.Val() == 1
@@ -31,7 +38,6 @@ func SaveNewUrl(urlId, originalUrl string) bool {
 func GetOriginalUrl(urlId string) (string, error) {
 	result := client.HGet(redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId)
 	originalUrl := result.Val()
-	fmt.Print(originalUrl)
 	if len(originalUrl) > 0 {
 		return originalUrl, nil
 	} else {
