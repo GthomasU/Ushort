@@ -16,6 +16,7 @@ func configRoutes() {
 	groupV1 := app.Group("api/v1/")
 	groupRedirect := app.Group("r/")
 	groupRedirect.Get("/*", controllers.RedirectUrl)
+	groupRedirect.Delete("/*", controllers.RemoveUrl)
 	groupV1.Post("/url", controllers.CreateShortUrl)
 }
 

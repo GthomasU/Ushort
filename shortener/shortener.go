@@ -14,6 +14,15 @@ func CreateShortUrl(originalUrl string) (*string, error) {
 	return nil, fmt.Errorf("cannot created shorted url")
 }
 
-func GetOriginalUrl(urlId string) string {
-	return redis.GetOriginalUrl(urlId)
+func GetOriginalUrl(urlId string) (string, error) {
+	result, err := redis.GetOriginalUrl(urlId)
+	if err != nil {
+		if _, ok := err.(redis.RecordNotFound); ok {
+			return "", UrlNotFound{}
+		}
+	}
+	return result, nil
+}
+func RemoveOriginalUrl(urlId string) bool {
+	return redis.RemoveOriginalUrl(urlId)
 }

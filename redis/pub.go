@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -27,8 +28,19 @@ func SaveNewUrl(urlId, originalUrl string) bool {
 	return fieldsAdded.Val() == 1
 }
 
-func GetOriginalUrl(urlId string) string {
+func GetOriginalUrl(urlId string) (string, error) {
 	result := client.HGet(redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId)
 	originalUrl := result.Val()
-	return originalUrl
+	fmt.Print(originalUrl)
+	if len(originalUrl) > 0 {
+		return originalUrl, nil
+	} else {
+		return "", RecordNotFound{}
+	}
+
+}
+
+func RemoveOriginalUrl(urlId string) bool {
+	result := client.HDel(redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId)
+	return result.Val() == 1
 }

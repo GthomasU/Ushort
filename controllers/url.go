@@ -27,6 +27,19 @@ func CreateShortUrl(c *fiber.Ctx) error {
 }
 
 func RedirectUrl(c *fiber.Ctx) error {
-	originalUrl := shortener.GetOriginalUrl(strings.Split(c.Path(), "/")[2])
+	originalUrl, err := shortener.GetOriginalUrl(strings.Split(c.Path(), "/")[2])
+	if err != nil {
+		return c.SendStatus(fiber.StatusNotFound)
+	}
 	return c.Redirect(originalUrl)
+}
+
+func RemoveUrl(c *fiber.Ctx) error {
+	urlId := strings.Split(c.Path(), "/")[2]
+	result := shortener.RemoveOriginalUrl(urlId)
+	if result {
+		return c.SendStatus(fiber.StatusOK)
+	} else {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
 }
