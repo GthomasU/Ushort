@@ -11,6 +11,11 @@ type ControllerUrl struct {
 	serviceShortener services.ServiceShortener
 }
 
+func NewControllerUrl() ControllerUrl {
+	serviceShortener := services.NewServiceShortener()
+	return ControllerUrl{serviceShortener: serviceShortener}
+
+}
 func (cu ControllerUrl) CreateShortUrl(c *fiber.Ctx) error {
 	payload := PostShortUrl{}
 	if err := c.BodyParser(&payload); err != nil {
@@ -63,5 +68,4 @@ func (cu ControllerUrl) UpdateUrl(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusOK)
 	}
 	return c.SendStatus(fiber.StatusBadRequest)
-
 }

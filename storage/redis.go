@@ -25,19 +25,19 @@ func NewRedisClient() *RedisClient {
 	}
 
 }
-func (rc RedisClient) UpdateUrl(urlId, originalUrl string) bool {
+func (rc *RedisClient) UpdateUrl(urlId, originalUrl string) bool {
 	_ = rc.client.HSet(rc.redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId, originalUrl)
 	result := rc.client.HGet(rc.redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId)
 	urlUpdated := result.Val()
 	return urlUpdated == originalUrl
 }
 
-func (rc RedisClient) SaveNewUrl(urlId, originalUrl string) bool {
+func (rc *RedisClient) SaveNewUrl(urlId, originalUrl string) bool {
 	fieldsAdded := rc.client.HSet(rc.redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId, originalUrl)
 	return fieldsAdded.Val() == 1
 }
 
-func (rc RedisClient) GetOriginalUrl(urlId string) (string, error) {
+func (rc *RedisClient) GetOriginalUrl(urlId string) (string, error) {
 	result := rc.client.HGet(rc.redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId)
 	originalUrl := result.Val()
 	if len(originalUrl) > 0 {
@@ -45,10 +45,9 @@ func (rc RedisClient) GetOriginalUrl(urlId string) (string, error) {
 	} else {
 		return "", RecordNotFound{}
 	}
-
 }
 
-func (rc RedisClient) RemoveOriginalUrl(urlId string) bool {
+func (rc *RedisClient) RemoveOriginalUrl(urlId string) bool {
 	result := rc.client.HDel(rc.redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId)
 	return result.Val() == 1
 }

@@ -6,13 +6,15 @@ import (
 
 type Server struct {
 	app           *fiber.App
-	ControllerUrl ControllerUrl
+	controllerUrl ControllerUrl
 }
 
 func NewServer() Server {
 	app := fiber.New()
+	controllerUrl := NewControllerUrl()
 	server := Server{
-		app: app,
+		controllerUrl: controllerUrl,
+		app:           app,
 	}
 	server.configRoutes()
 	return server
@@ -21,10 +23,10 @@ func NewServer() Server {
 func (s Server) configRoutes() {
 	groupV1 := s.app.Group("api/v1/")
 	groupRedirect := s.app.Group("r/")
-	groupRedirect.Get("/*", s.ControllerUrl.RedirectUrl)
-	groupRedirect.Delete("/*", s.ControllerUrl.RemoveUrl)
-	groupRedirect.Put("/*", s.ControllerUrl.UpdateUrl)
-	groupV1.Post("/url", s.ControllerUrl.CreateShortUrl)
+	groupRedirect.Get("/*", s.controllerUrl.RedirectUrl)
+	groupRedirect.Delete("/*", s.controllerUrl.RemoveUrl)
+	groupRedirect.Put("/*", s.controllerUrl.UpdateUrl)
+	groupV1.Post("/url", s.controllerUrl.CreateShortUrl)
 }
 
 func (s Server) StartListening() {
