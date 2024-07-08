@@ -1,13 +1,17 @@
-package controllers
+package api
 
 import (
-	"Ushort/shortener"
+	"Ushort/services"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func CreateShortUrl(c *fiber.Ctx) error {
+type ControllerUrl struct {
+	serviceShortener services.ServiceShortener
+}
+
+func (cu ControllerUrl) CreateShortUrl(c *fiber.Ctx) error {
 	payload := PostShortUrl{}
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(ResponseBadRequest{
@@ -15,7 +19,7 @@ func CreateShortUrl(c *fiber.Ctx) error {
 			ErrorMessage: err.Error(),
 		})
 	}
-	shortedUrl, err := shortener.CreateShortUrl(payload.Url)
+	shortedUrl, err := cu.serviceShortener.CreateShortUrl(payload.Url)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(ResponseBadRequest{
 			ErrorCode:    "E002",
@@ -27,17 +31,17 @@ func CreateShortUrl(c *fiber.Ctx) error {
 	})
 }
 
-func RedirectUrl(c *fiber.Ctx) error {
-	originalUrl, err := shortener.GetOriginalUrl(strings.Split(c.Path(), "/")[2])
+func (cu ControllerUrl) RedirectUrl(c *fiber.Ctx) error {
+	originalUrl, err := cu.serviceShortener.GetOriginalUrl(strings.Split(c.Path(), "/")[2])
 	if err != nil {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
 	return c.Redirect(originalUrl)
 }
 
-func RemoveUrl(c *fiber.Ctx) error {
+func (cu ControllerUrl) RemoveUrl(c *fiber.Ctx) error {
 	urlId := strings.Split(c.Path(), "/")[2]
-	result := shortener.RemoveOriginalUrl(urlId)
+	result := cu.serviceShortener.RemoveOriginalUrl(urlId)
 	if result {
 		return c.SendStatus(fiber.StatusOK)
 	} else {
@@ -45,7 +49,7 @@ func RemoveUrl(c *fiber.Ctx) error {
 	}
 }
 
-func UpdateUrl(c *fiber.Ctx) error {
+func (cu ControllerUrl) UpdateUrl(c *fiber.Ctx) error {
 	urlId := strings.Split(c.Path(), "/")[2]
 	payload := PostShortUrl{}
 	if err := c.BodyParser(&payload); err != nil {
@@ -54,7 +58,7 @@ func UpdateUrl(c *fiber.Ctx) error {
 			ErrorMessage: err.Error(),
 		})
 	}
-	result := shortener.UpdateOriginalUrl(urlId, payload.Url)
+	result := cu.serviceShortener.UpdateOriginalUrl(urlId, payload.Url)
 	if result {
 		return c.SendStatus(fiber.StatusOK)
 	}

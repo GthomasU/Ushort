@@ -1,4 +1,4 @@
-package controllers
+package api 
 
 type ResponseBadRequest struct {
 	ErrorCode    string //`json: errorCode`

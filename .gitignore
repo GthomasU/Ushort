@@ -1,2 +1,4 @@
 main
 .vscode
+.idea
+.DS_store

@@ -1,4 +1,4 @@
-package controllers
+package api 
 
 type PostShortUrl struct {
 	Url string `json:"url"`

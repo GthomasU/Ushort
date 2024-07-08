@@ -1,4 +1,4 @@
-package redis
+package storage 
 
 type error interface {
 	Error() string

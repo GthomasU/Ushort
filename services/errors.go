@@ -1,4 +1,4 @@
-package shortener
+package services 
 
 type error interface {
 	Error() string
