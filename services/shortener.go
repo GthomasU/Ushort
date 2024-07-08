@@ -6,26 +6,44 @@ import (
 )
 
 type ServiceShortener struct {
-	storage storage.StorageI
+	storage      storage.StorageI
+	urlGenerator IUrlGenerator
+	domain       string
+	sslActive    bool
 }
 
-func NewServiceShortener() ServiceShortener {
-	redisClient := storage.NewRedisClient()
+func NewServiceShortener(urlGenerator IUrlGenerator, sslActive bool, storage storage.StorageI) ServiceShortener {
 	return ServiceShortener{
-		storage: redisClient,
+		storage:      storage,
+		urlGenerator: urlGenerator,
+		domain:       "localhost",
+		sslActive:    false,
 	}
 }
 
-func (ss ServiceShortener) CreateShortUrl(originalUrl string) (*string, error) {
-	urlId := createRandomString(10)
-	shortedUrl := fmt.Sprintf("https://localhost:3000/r/%s", urlId)
-	if ss.storage.SaveNewUrl(urlId, originalUrl) {
+func (ss *ServiceShortener) SetSslActive(active bool) {
+	ss.sslActive = active
+}
+func (ss *ServiceShortener) CreateShortUrl(originalUrl string) (*string, error) {
+	urlId, error := ss.urlGenerator.CreateRandomString(10)
+	if error != nil {
+		return nil, error
+	}
+	protocol := "http"
+	if ss.sslActive {
+		protocol = fmt.Sprintf("%ss", protocol)
+	}
+	shortedUrl := fmt.Sprintf("%s://%s:3000/r/%s", protocol, ss.domain, *urlId)
+	if ss.storage.SaveNewUrl(*urlId, originalUrl) {
 		return &shortedUrl, nil
 	}
 	return nil, fmt.Errorf("cannot created shorted url")
 }
 
-func (ss ServiceShortener) GetOriginalUrl(urlId string) (string, error) {
+func (ss *ServiceShortener) GetOriginalUrl(urlId string) (string, error) {
+	if len(urlId) == 0 {
+		return "", InvalidUrlId{}
+	}
 	result, err := ss.storage.GetOriginalUrl(urlId)
 	if err != nil {
 		switch err.(type) {
@@ -38,10 +56,18 @@ func (ss ServiceShortener) GetOriginalUrl(urlId string) (string, error) {
 	return result, nil
 }
 
-func (ss ServiceShortener) RemoveOriginalUrl(urlId string) bool {
-	return ss.storage.RemoveOriginalUrl(urlId)
+func (ss *ServiceShortener) RemoveOriginalUrl(urlId string) (bool, error) {
+	if len(urlId) == 0 {
+		return false, InvalidUrlId{}
+	}
+	return ss.storage.RemoveOriginalUrl(urlId), nil
 }
 
-func (ss ServiceShortener) UpdateOriginalUrl(urlId, originalUrl string) bool {
-	return ss.storage.UpdateUrl(urlId, originalUrl)
+func (ss *ServiceShortener) UpdateOriginalUrl(urlId, originalUrl string) (bool, error) {
+	if len(urlId) == 0 {
+		return false, InvalidUrlId{}
+	}
+	result := ss.storage.UpdateUrl(urlId, originalUrl)
+	return result, nil
+
 }

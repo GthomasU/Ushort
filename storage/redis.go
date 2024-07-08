@@ -37,7 +37,7 @@ func (rc *RedisClient) SaveNewUrl(urlId, originalUrl string) bool {
 	return fieldsAdded.Val() == 1
 }
 
-func (rc *RedisClient) GetOriginalUrl(urlId string) (string, error) {
+func (rc *RedisClient) GetOriginalUrl(urlId string) (string, Error) {
 	result := rc.client.HGet(rc.redis_context, HASH_URL_ORIGINAL_TO_SHORTED, urlId)
 	originalUrl := result.Val()
 	if len(originalUrl) > 0 {

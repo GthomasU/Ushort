@@ -2,6 +2,7 @@ package api
 
 import (
 	"Ushort/services"
+	"Ushort/storage"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,7 +13,9 @@ type ControllerUrl struct {
 }
 
 func NewControllerUrl() ControllerUrl {
-	serviceShortener := services.NewServiceShortener()
+	urlGenerator := services.NewUrlGenerator()
+	redisClient := storage.NewRedisClient()
+	serviceShortener := services.NewServiceShortener(urlGenerator, true, redisClient)
 	return ControllerUrl{serviceShortener: serviceShortener}
 
 }
@@ -46,7 +49,10 @@ func (cu ControllerUrl) RedirectUrl(c *fiber.Ctx) error {
 
 func (cu ControllerUrl) RemoveUrl(c *fiber.Ctx) error {
 	urlId := strings.Split(c.Path(), "/")[2]
-	result := cu.serviceShortener.RemoveOriginalUrl(urlId)
+	result, err := cu.serviceShortener.RemoveOriginalUrl(urlId)
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
 	if result {
 		return c.SendStatus(fiber.StatusOK)
 	} else {
@@ -63,7 +69,10 @@ func (cu ControllerUrl) UpdateUrl(c *fiber.Ctx) error {
 			ErrorMessage: err.Error(),
 		})
 	}
-	result := cu.serviceShortener.UpdateOriginalUrl(urlId, payload.Url)
+	result, err := cu.serviceShortener.UpdateOriginalUrl(urlId, payload.Url)
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
 	if result {
 		return c.SendStatus(fiber.StatusOK)
 	}

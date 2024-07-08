@@ -1,6 +1,6 @@
 package storage 
 
-type error interface {
+type Error interface {
 	Error() string
 }
 
