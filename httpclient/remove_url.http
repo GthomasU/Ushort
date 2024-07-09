@@ -1,2 +1,2 @@
-DELETE  http://localhost:3000/r/ZXFrnDnuRX HTTP/1.1
+DELETE  http://localhost:3000/api/v1/url/ZXFrnDnuRX HTTP/1.1
 content-type: application/json

@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger" // swagger handler
 )
 
 type Server struct {
@@ -15,6 +16,7 @@ func NewServer() Server {
 	server := Server{
 		controllerUrl: controllerUrl,
 		app:           app,
+
 	}
 	server.configRoutes()
 	return server
@@ -22,11 +24,14 @@ func NewServer() Server {
 }
 func (s Server) configRoutes() {
 	groupV1 := s.app.Group("api/v1/")
+	groupV1.Delete("/url/*", s.controllerUrl.RemoveUrl)
+	groupV1.Put("/url/*", s.controllerUrl.UpdateUrl)
+	groupV1.Post("/url", s.controllerUrl.CreateShortUrl)
 	groupRedirect := s.app.Group("r/")
 	groupRedirect.Get("/*", s.controllerUrl.RedirectUrl)
-	groupRedirect.Delete("/*", s.controllerUrl.RemoveUrl)
-	groupRedirect.Put("/*", s.controllerUrl.UpdateUrl)
-	groupV1.Post("/url", s.controllerUrl.CreateShortUrl)
+
+	groupSwagger := s.app.Group("/swagger")
+	groupSwagger.Get("/*", swagger.HandlerDefault)
 }
 
 func (s Server) StartListening() {

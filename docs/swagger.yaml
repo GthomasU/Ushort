@@ -1,0 +1,123 @@
+definitions:
+  api.PostShortUrl:
+    properties:
+      url:
+        type: string
+    type: object
+  api.ResponseBadRequest:
+    properties:
+      errorCode:
+        description: '`json: errorCode`'
+        type: string
+      errorMessage:
+        description: '`json:errorMessage`'
+        type: string
+    type: object
+  api.ResponseShortUrl:
+    properties:
+      url:
+        type: string
+    type: object
+info:
+  contact:
+    email: gabrielthomas300@gmail.com
+    name: API Support
+  description: This is a Ushort API documentation.
+  title: Ushort API
+  version: "1.0"
+paths:
+  /api/v1/url:
+    post:
+      consumes:
+      - application/json
+      description: Endpoint for create shorted url
+      parameters:
+      - description: Url to short
+        in: body
+        name: url
+        required: true
+        schema:
+          $ref: '#/definitions/api.ResponseShortUrl'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ResponseShortUrl'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/api.ResponseBadRequest'
+      summary: Create Shorted Url
+      tags:
+      - Url
+  /api/v1/url/{urlId}:
+    delete:
+      consumes:
+      - application/json
+      description: Endpoint for remove shorted url
+      parameters:
+      - description: UrlId to remove
+        in: path
+        name: urlId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: Remove Shorted Url
+      tags:
+      - Url
+    put:
+      consumes:
+      - application/json
+      description: Endpoint for update original url
+      parameters:
+      - description: Url to update
+        in: body
+        name: url
+        required: true
+        schema:
+          $ref: '#/definitions/api.PostShortUrl'
+      - description: UrlId to update
+        in: path
+        name: urlId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: Update original Url
+      tags:
+      - Url
+  /r/{urlId}:
+    get:
+      consumes:
+      - application/json
+      description: Endpoint for redirect shorted url
+      parameters:
+      - description: UrlId to redirect
+        in: path
+        name: urlId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Found
+        "404":
+          description: Not Found
+      summary: Redirect an Url
+      tags:
+      - Redirect
+swagger: "2.0"
