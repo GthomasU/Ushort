@@ -1,14 +1,46 @@
-package tests
+package services
 
 import (
-	"Ushort/services"
+	"Ushort/storage"
+	"fmt"
 	"reflect"
 	"testing"
 )
 
-var serviceShortener services.ServiceShortener
+var serviceShortener ServiceShortener
+
+type UrlGeneratorMock struct{}
+
+type StorageMock struct {
+}
+
+func (sm StorageMock) UpdateUrl(urlId, originalUrl string) bool {
+	return true
+}
+func (sm StorageMock) SaveNewUrl(urlId, originalUrl string) bool {
+	return true
+}
+func (sm StorageMock) GetOriginalUrl(urlId string) (string, storage.Error) {
+	if urlId == "abcdefghi" {
+		return "https://www.wikipedia.org", nil
+	} else {
+		return "", storage.RecordNotFound{}
+	}
+}
+func (sm StorageMock) RemoveOriginalUrl(urlId string) bool {
+	if urlId == "abcdefghi" {
+		return true
+	}
+	return false
+}
+
+func (ug UrlGeneratorMock) CreateRandomString(n int) (*string, Error) {
+	mock := fmt.Sprint("abcdefghi")
+	return &mock, nil
+}
 
 func TestCreateShortUrl(t *testing.T) {
+	serviceShortener = NewServiceShortener(UrlGeneratorMock{}, true, StorageMock{})
 	testCases := []struct {
 		Name          string
 		OriginalUrl   string
@@ -45,6 +77,7 @@ func TestCreateShortUrl(t *testing.T) {
 }
 
 func TestGetOriginalUrl(t *testing.T) {
+	serviceShortener = NewServiceShortener(UrlGeneratorMock{}, true, StorageMock{})
 	testCases := []struct {
 		Name          string
 		urlId         string
@@ -60,13 +93,13 @@ func TestGetOriginalUrl(t *testing.T) {
 		{
 			Name:          "Obtener url que no existe",
 			urlId:         "abcd",
-			ExpectedError: services.UrlNotFound{},
+			ExpectedError: UrlNotFound{},
 			ExpectedUrl:   "https://www.wikipedia.org",
 		},
 		{
 			Name:          "Obtener url con urlId vacía",
 			urlId:         "",
-			ExpectedError: services.InvalidUrlId{},
+			ExpectedError: InvalidUrlId{},
 			ExpectedUrl:   "https://www.wikipedia.org",
 		},
 	}
@@ -90,6 +123,7 @@ func TestGetOriginalUrl(t *testing.T) {
 
 func TestRemoveOriginalUrl(t *testing.T) {
 
+	serviceShortener = NewServiceShortener(UrlGeneratorMock{}, true, StorageMock{})
 	testClases := []struct {
 		name           string
 		urlId          string
@@ -105,7 +139,7 @@ func TestRemoveOriginalUrl(t *testing.T) {
 		{
 			name:           "Remover urlId invalida",
 			urlId:          "",
-			expectedError:  services.InvalidUrlId{},
+			expectedError:  InvalidUrlId{},
 			expectedResult: false,
 		},
 		{
@@ -139,6 +173,7 @@ func TestRemoveOriginalUrl(t *testing.T) {
 }
 
 func TestUpdateOriginalUrl(t *testing.T) {
+	serviceShortener = NewServiceShortener(UrlGeneratorMock{}, true, StorageMock{})
 	testClases := []struct {
 		name           string
 		urlId          string
@@ -158,7 +193,7 @@ func TestUpdateOriginalUrl(t *testing.T) {
 			urlId:          "",
 			originalUrl:    "https://www.youtube.com",
 			expectedResult: false,
-			expectedError:  services.InvalidUrlId{},
+			expectedError:  InvalidUrlId{},
 		},
 	}
 	for i := range testClases {

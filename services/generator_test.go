@@ -1,19 +1,15 @@
-package tests
+package services
 
 import (
-	"Ushort/services"
 	"os"
 	"reflect"
 	"testing"
 )
 
-var urlGenerator services.UrlGenerator
+var urlGenerator UrlGenerator
 
 func TestMain(m *testing.M) {
-	urlGenerator = services.NewUrlGenerator()
-	storageMock := StorageMock{}
-
-	serviceShortener = services.NewServiceShortener(UrlGeneratorMock{}, false, storageMock)
+	urlGenerator = NewUrlGenerator()
 	code := m.Run()
 	os.Exit(code)
 }
@@ -32,7 +28,7 @@ func TestCreateRandomString(t *testing.T) {
 		{
 			Name:          "Generar string con longitud invalida",
 			N:             0,
-			ErrorExpected: services.InvalidLength{Length: 0},
+			ErrorExpected: InvalidLength{Length: 0},
 		},
 	}
 	for i := range testCases {
